@@ -1,0 +1,19 @@
+with open("text.txt", 'r'):
+    content = open("text.txt")
+    lines = content.read()
+    lines = lines.swapcase()
+print(lines)
+
+
+with open("text.txt", 'r'):
+    content = open("text.txt")
+    lines = content.read()
+    lines = lines.upper()
+print(lines)
+
+
+with open("text.txt", 'r'):
+    content = open("text.txt")
+    lines = content.read()
+    lines = lines.lower()
+print(lines)
