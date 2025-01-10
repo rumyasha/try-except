@@ -1,0 +1,29 @@
+vowels = "aeiouAEIOU"
+consonants = "bcdfghjklmnpqrstvwxyzBCDFGHJKLMNPQRSTVWXYZ"
+
+with open("lorem_ipsum.txt", "r") as file:
+    content = file.read()
+
+cleaned_content = content.replace(" ",
+                                  "").replace("\n",
+                                                   "").replace(".",
+                                                               "").replace(",", "").replace("'", "")
+
+vowels_only = "".join(char for char in cleaned_content if char in vowels)
+consonants_only = "".join(char for char in cleaned_content if char in consonants)
+
+with open("vowels.txt", "w") as file:
+    file.write(vowels_only)
+
+with open("consonants.txt", "w") as file:
+    file.write(consonants_only)
+
+num_vowels = len(vowels_only)
+num_consonants = len(consonants_only)
+total_letters = num_vowels + num_consonants
+total_words = len(content.split())
+
+print("Количество гласных: ", num_vowels)
+print("Количество согласных: ", num_consonants)
+print("Общее количество букв: ", total_letters)
+print("Количество слов: ", total_words)
