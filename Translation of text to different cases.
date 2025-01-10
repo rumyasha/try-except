@@ -1,0 +1,15 @@
+with open("text_lines.txt", "r", encoding="utf-8") as f:
+    content = f.readlines()
+
+
+g = [i for i in content for i in i.split() if len(i) > 7]
+
+
+with open("filtered_text.txt", "w", encoding="utf-8") as f:
+    f.writelines("\n".join(g))
+q = "Python"
+d = sum(i.count(q) for i in content)
+
+
+print(d)
+print(g)
