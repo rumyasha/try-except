@@ -1,0 +1,18 @@
+with open("file.txt", "r",encoding="utf-8") as f:
+    content = f.read()
+
+a = input("Введите прилагательное:")
+content = content.replace("[прилагательное]", a)
+b = input("Введите существительное:")
+content = content.replace("[существительное]", b)
+c = input("Введите глагол:")
+content = content.replace("[глагол]", c)
+d = input("Введите наречие:")
+content = content.replace("[наречие]", d)
+
+
+
+with open("file.txt", "w", encoding="utf-8") as f:
+    f.write(content)
+
+print(content)
