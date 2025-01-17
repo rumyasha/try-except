@@ -4,8 +4,4 @@ class Car:
         self.model = model
         self.year = year
 get_info = Car("BMW", "X5 E70", "2013")
-print(get_info.brand)
-print("------" * 20) #это для красоты
-print(get_info.model)
-print("------" * 20) #это для красоты 
-print(get_info.year)
+print(get_info.brand, get_info.model, get_info.year)
