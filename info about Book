@@ -1,0 +1,11 @@
+class Book:
+    def __init__(self, title, author):
+        self.title = title
+        self.author = author
+
+Book_2 = Book("1984", "Джордж Оруэлл")
+get_info = Book("Убить пересмешника", "Харпер Ли")
+
+print(f"Название книги: {Book_2.title}, Автор:{Book_2.author}")
+print("-----" * 20)#ради красоты
+print(f"Название книги: {get_info.title}, Автор: {get_info.author}")
