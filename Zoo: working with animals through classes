@@ -1,0 +1,29 @@
+class Animal:
+    def __init__(self, name, weight):
+        self.name = name
+        self.weight = weight
+
+    def feed(self, amount):
+        self.weight += amount
+        print(f"{self.name} покушал и теперь весит {self.weight} кг.")
+
+
+class Zoo:
+    def __init__(self):
+        self.animals = []
+
+    def add_animal(self, animal):
+        self.animals.append(animal)
+        print(f"Животное {animal.name} добавлено в зоопарк.")
+
+    def feed_all(self, amount):
+        print(f"Зоопарк кормит всех животных на {amount} кг пищи.")
+        for animal in self.animals:
+            animal.feed(amount)
+
+lion = Animal("Лев", 150)
+elephant = Animal("Слон", 5000)
+zoo = Zoo()
+zoo.add_animal(lion)
+zoo.add_animal(elephant)
+zoo.feed_all(5)
