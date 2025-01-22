@@ -1,0 +1,33 @@
+class Player:
+    def __init__(self, name, score, position):
+        self.name = name
+        self.score = score
+        self.position = position
+
+    def __str__(self):
+        return f"Игрок {self.name} играет на позиции {self.position} с номером {self.score}"
+
+
+class ScoringGoal(Player):
+    def __init__(self, name, score, position):
+        super().__init__(name, score, position)
+
+    def __str__(self):
+        return f"Нападающий {self.name} забил гол!!!!!!!!!!!"
+
+
+class Fend_off_the_blow(Player):
+    def __init__(self, name, score, position):
+        super().__init__(name, score, position)
+        
+    def __str__(self):
+        return f"Вратарь {self.name} отбил удар!"
+
+obj = Player("Иван", 9, "защитник")
+print(obj)
+print("--------------------------------" * 3)
+obj_2 = ScoringGoal("Иван", 10, "нападающий")
+print(obj_2)
+print("--------------------------------" * 3)
+obj_3 = Fend_off_the_blow("Сергей", 1, "вратарь")
+print(obj_3)
