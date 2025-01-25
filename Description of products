@@ -1,0 +1,32 @@
+from abc import ABC, abstractmethod
+class Product(ABC):
+    @abstractmethod
+    def __init__(self, name, features, price):
+        self.name = name
+        self.features = features
+        self.price = price
+
+    @abstractmethod
+    def get_description(self):
+        """Описание продукта."""
+        pass
+
+class Food(Product):
+    def __init__(self, name, features, price):
+        super().__init__(name, features, price)
+
+    def get_description(self):
+        return f"Продукт: {self.name}, Особенности: {self.features}, Цена: {self.price} руб."
+
+class Clothing(Product):
+    def __init__(self, name, features, price):
+        super().__init__(name, features, price)
+
+    def get_description(self):
+        return f"Одежда: {self.name}, Размер: {self.features}, Цена: {self.price} руб."
+
+food = Food("Яблоко", "Красные, 2кг", 240)
+clothing = Clothing("Футболка", "M", 350)
+
+print(food.get_description())
+print(clothing.get_description())
