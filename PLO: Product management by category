@@ -1,0 +1,52 @@
+from abc import ABC, abstractmethod
+
+
+class Product(ABC):
+    def __init__(self, name, price, description):
+        self.name = name
+        self.price = price
+        self.description = description
+
+    @abstractmethod
+    def get_description(self):
+        pass
+
+    def get_price(self):
+        return self.price
+
+    def get_name(self):
+        return self.name
+
+    def __str__(self):
+        return f"{self.name}: {self.get_description()}, Цена: {self.price} сом."
+
+
+class Food(Product):
+    def __init__(self, name, price, description, expiration_date):
+        super().__init__(name, price, description)
+        self.expiration_date = expiration_date
+
+    def get_description(self):
+        return f"{self.description}, срок годности до {self.expiration_date}"
+
+
+class Electronics(Product):
+    def __init__(self, name, price, description, warranty_period):
+        super().__init__(name, price, description)
+        self.warranty_period = warranty_period
+
+    def get_description(self):
+        return f"{self.description}, гарантия {self.warranty_period}"
+
+obj = Food("Бананы", 150, "Пищевой продукт", "2025-08-15")
+obj_2 = Electronics("Наушники", 8000, "Электронное устройство", "12 месяцев")
+obj_3 = Food("Апельсины", 300, "Пищевой продукт", "2025-07-01")
+obj_4 = Food("Кефир", 120, "Пищевой продукт", "2025-01-25")
+obj_5 = Electronics("Ноутбук", 97000, "Электронное устройство", "18 месяцев")
+obj_6 = Electronics("Телевизор", 10000, "Электронное устройство", "36 месяцев")
+print(obj)
+print(obj_2)
+print(obj_3)
+print(obj_4)
+print(obj_5)
+print(obj_6)
