@@ -1,0 +1,26 @@
+class Menultem:
+    def __init__(self, price):
+        self.price = price
+
+    def get_price(self):
+        return self.price
+
+    def __str__(self):
+        return f"Цена: {self.price} сом."
+
+class MainDish(Menultem):
+    def __init__(self, price):
+        super().__init__(price)
+
+class Dessert(Menultem):
+    def __init__(self, price):
+        super().__init__(price)
+
+obj = MainDish(1200)
+obj_2 = MainDish(800)
+obj_3 = Dessert(500)
+obj_4 = Dessert(450)
+print(f"Стейк (основное блюдо): {obj}")
+print(f"Паста (основное блюдо): {obj_2}")
+print(f"Тирамису (десерт): {obj_3}")
+print(f"Чизкейк (десерт): {obj_4}")
