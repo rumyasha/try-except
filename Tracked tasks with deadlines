@@ -1,0 +1,33 @@
+from datetime import datetime
+
+class Task:
+    def __init__(self, task_name: str, description: str, deadline: str):
+        self.task_name = task_name
+        self.description = description
+        self.deadline = datetime.strptime(deadline, "%Y-%m-%d").date()
+
+    def days_left(self) -> int:
+        current_date = datetime.now().date()
+        return (self.deadline - current_date).days
+
+    @classmethod
+    def from_string(cls, task_string: str):
+        task_name, deadline = task_string.split(",")
+        return cls(task_name.strip(), "Описание не указано", deadline.strip())
+
+    def __str__(self):
+        days = self.days_left()
+        status = (
+            f"{days} дней до дедлайна" if days >= 0
+            else f"Дедлайн просрочен на {-days} дней"
+        )
+        return (
+            f"Задача: {self.task_name}\n"
+            f"Описание: {self.description}\n"
+            f"Дней до дедлайна: {status}"
+        )
+
+if __name__ == "__main__":
+    task = Task.from_string("Купить хлеб,2025-01-27")
+    print(task)
+    print(f"Осталось дней до дедлайна: {task.days_left()}")
