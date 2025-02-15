@@ -1,0 +1,28 @@
+CREATE TABLE books (
+    book_id SERIAL PRIMARY KEY,
+    title VARCHAR(100),
+    author VARCHAR(100),
+    price NUMERIC(10, 2),
+    stock INTEGER CHECK (stock >= 0),
+    created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT NOW()
+);
+
+ALTER TABLE books ADD COLUMN updated_at TIMESTAMP DEFAULT NOW();
+
+INSERT INTO books (title, author, price, stock) VALUES
+('Преступление и наказание', 'Ф. Достоевский', 499.99, 10),
+('Война и мир', 'Л. Толстой', 799.50, 5),
+('Мастер и Маргарита', 'М. Булгаков', 599.00, 3),
+('Анна Каренина', 'Л. Толстой', 699.90, 0),
+('Идиот', 'Ф. Достоевский', 549.99, 7);
+
+SELECT * FROM books WHERE price > 200;
+
+SELECT * FROM books WHERE stock > 0;
+
+UPDATE books 
+SET price = 599.99, updated_at = NOW()
+WHERE title = 'Преступление и наказание';
+
+DELETE FROM books WHERE stock = 0;
+
