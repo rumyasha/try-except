@@ -1,0 +1,87 @@
+import asyncio
+import os
+from aiogram import Bot, Dispatcher, types
+from aiogram.filters import CommandStart
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, KeyboardButton
+from dotenv import load_dotenv
+
+load_dotenv()
+
+TOKEN = "7770501955:AAEfJT7YqQCvyJvMLknZvtTdvIYHQ-Mld60"
+
+bot = Bot(token=TOKEN)
+
+dp = Dispatcher()
+
+coffee_menu = InlineKeyboardMarkup(inline_keyboard=[
+    [InlineKeyboardButton(text="☕ Американо", callback_data="americano")],
+    [InlineKeyboardButton(text="🥛 Латте", callback_data="latte")],
+    [InlineKeyboardButton(text="🍫 Капучино", callback_data="cappuccino")]
+])
+
+size_menu = ReplyKeyboardMarkup(keyboard=[
+    [KeyboardButton(text="Маленький"), KeyboardButton(text="Средний"), KeyboardButton(text="Большой")]
+], resize_keyboard=True, one_time_keyboard=True)
+
+confirm_menu = InlineKeyboardMarkup(inline_keyboard=[
+    [InlineKeyboardButton(text="✅ Подтвердить заказ", callback_data="confirm")],
+    [InlineKeyboardButton(text="❌ Отмена", callback_data="cancel")]
+])
+
+user_orders = {}
+
+@dp.message(CommandStart())
+async def start(message: types.Message):
+    await message.answer("Привет! Какой кофе желаете?", reply_markup=coffee_menu)
+
+@dp.callback_query()
+async def process_callback(callback: types.CallbackQuery):
+    user_id = callback.from_user.id
+
+    if callback.data in ["americano", "latte", "cappuccino"]:
+        user_orders[user_id] = {"coffee": callback.data}
+        await callback.message.answer(f"Вы выбрали {callback.data}. Какой размер?", reply_markup=size_menu)
+
+    elif callback.data == "confirm":
+        order = user_orders.get(user_id, {})
+        coffee = order.get("coffee", "?")
+        size = order.get("size", "?")
+        comment = order.get("comment", "Без комментария")
+
+        await callback.message.answer(
+            f"☕ Ваш заказ: {coffee}, {size}.\n"
+            f"Комментарий: {comment}\n"
+            "Заказ принят! Будет готов в течение 5 минут."
+        )
+
+        user_orders.pop(user_id, None)
+
+    elif callback.data == "cancel":
+        await callback.message.answer("❌ Заказ отменен.")
+        user_orders.pop(user_id, None)
+
+@dp.message()
+async def process_message(message: types.Message):
+    user_id = message.from_user.id
+
+    if user_id in user_orders and "coffee" in user_orders[user_id]:
+        if message.text in ["Маленький", "Средний", "Большой"]:
+            user_orders[user_id]["size"] = message.text
+            await message.answer("Добавьте комментарий к заказу (или напишите 'Без комментария').")
+
+        elif "size" in user_orders[user_id]:
+            user_orders[user_id]["comment"] = message.text
+            await message.answer("Подтвердите заказ.", reply_markup=confirm_menu)
+
+        else:
+            await message.answer("Пожалуйста, выберите размер кофе.", reply_markup=size_menu)
+
+    else:
+        await message.answer("Пожалуйста, начните заказ снова с /start")
+
+async def main():
+    print("Bot started...")
+    await dp.start_polling(bot)
+
+if __name__ == '__main__':
+    asyncio.run(main())
