@@ -76,9 +76,6 @@ async def process_message(message: types.Message):
         else:
             await message.answer("Пожалуйста, выберите размер кофе.", reply_markup=size_menu)
 
-    else:
-        await message.answer("Пожалуйста, начните заказ снова с /start")
-
 async def main():
     print("Bot started...")
     await dp.start_polling(bot)
