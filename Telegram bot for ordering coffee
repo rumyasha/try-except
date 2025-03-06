@@ -10,8 +10,13 @@ load_dotenv()
 TOKEN = "7770501955:AAEfJT7YqQCvyJvMLknZvtTdvIYHQ-Mld60"
 
 bot = Bot(token=TOKEN)
-
 dp = Dispatcher()
+
+coffee_images = {
+    "americano": "https://upload.wikimedia.org/wikipedia/commons/4/45/A_small_cup_of_coffee.JPG",
+    "latte": "https://upload.wikimedia.org/wikipedia/commons/c/c8/Latte_art_3.jpg",
+    "cappuccino": "https://upload.wikimedia.org/wikipedia/commons/7/7e/Cappuccino_at_Sightglass_Coffee.jpg"
+}
 
 coffee_menu = InlineKeyboardMarkup(inline_keyboard=[
     [InlineKeyboardButton(text="☕ Американо", callback_data="americano")],
@@ -38,9 +43,10 @@ async def start(message: types.Message):
 async def process_callback(callback: types.CallbackQuery):
     user_id = callback.from_user.id
 
-    if callback.data in ["americano", "latte", "cappuccino"]:
+    if callback.data in coffee_images:
         user_orders[user_id] = {"coffee": callback.data}
-        await callback.message.answer(f"Вы выбрали {callback.data}. Какой размер?", reply_markup=size_menu)
+        await bot.send_photo(chat_id=user_id, photo=coffee_images[callback.data],
+                             caption=f"Вы выбрали {callback.data}. Какой размер?", reply_markup=size_menu)
 
     elif callback.data == "confirm":
         order = user_orders.get(user_id, {})
@@ -51,7 +57,7 @@ async def process_callback(callback: types.CallbackQuery):
         await callback.message.answer(
             f"☕ Ваш заказ: {coffee}, {size}.\n"
             f"Комментарий: {comment}\n"
-            "Заказ принят! Будет готов в течение 5 минут."
+            "✅ Заказ принят! Будет готов в течение 5 минут."
         )
 
         user_orders.pop(user_id, None)
@@ -82,3 +88,4 @@ async def main():
 
 if __name__ == '__main__':
     asyncio.run(main())
+
