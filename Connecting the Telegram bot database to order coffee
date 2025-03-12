@@ -1,0 +1,130 @@
+import asyncio
+import os
+import asyncpg
+from aiogram import Bot, Dispatcher, types
+from aiogram.filters import CommandStart
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, KeyboardButton
+from dotenv import load_dotenv
+
+load_dotenv()
+
+TOKEN = os.getenv("TOKEN")
+DB_NAME = os.getenv("DB_NAME")
+DB_USER = os.getenv("DB_USER")
+DB_PASSWORD = os.getenv("DB_PASSWORD")
+DB_HOST = os.getenv("DB_HOST", "localhost")
+DB_PORT = os.getenv("DB_PORT", "5432")
+
+bot = Bot(token=TOKEN)
+dp = Dispatcher()
+db_pool = None
+
+coffee_images = {
+    "americano": "https://upload.wikimedia.org/wikipedia/commons/4/45/A_small_cup_of_coffee.JPG",
+    "latte": "https://upload.wikimedia.org/wikipedia/commons/c/c8/Latte_art_3.jpg",
+    "cappuccino": "https://upload.wikimedia.org/wikipedia/commons/7/7e/Cappuccino_at_Sightglass_Coffee.jpg"
+}
+
+coffee_menu = InlineKeyboardMarkup(inline_keyboard=[
+    [InlineKeyboardButton(text="☕ Американо", callback_data="americano")],
+    [InlineKeyboardButton(text="🥛 Латте", callback_data="latte")],
+    [InlineKeyboardButton(text="🍫 Капучино", callback_data="cappuccino")]
+])
+
+size_menu = ReplyKeyboardMarkup(keyboard=[
+    [KeyboardButton(text="Маленький"), KeyboardButton(text="Средний"), KeyboardButton(text="Большой")]
+], resize_keyboard=True, one_time_keyboard=True)
+
+confirm_menu = InlineKeyboardMarkup(inline_keyboard=[
+    [InlineKeyboardButton(text="✅ Подтвердить заказ", callback_data="confirm")],
+    [InlineKeyboardButton(text="❌ Отмена", callback_data="cancel")]
+])
+
+user_orders = {}
+
+async def register_user(user: types.User):
+    async with db_pool.acquire() as conn:
+        await conn.execute("""
+            INSERT INTO users (tg_id, username, first_name, last_name)
+            VALUES ($1, $2, $3, $4)
+            ON CONFLICT (tg_id) DO UPDATE 
+            SET username = EXCLUDED.username,
+                first_name = EXCLUDED.first_name,
+                last_name = EXCLUDED.last_name;
+        """, user.id, user.username, user.first_name, user.last_name)
+
+async def save_order(user_id: int, coffee: str, size: str, comment: str):
+    async with db_pool.acquire() as conn:
+        await conn.execute("""
+            INSERT INTO orders (user_id, coffee, size, comment)
+            VALUES ($1, $2, $3, $4);
+        """, user_id, coffee, size, comment)
+
+@dp.message(CommandStart())
+async def start(message: types.Message):
+    await register_user(message.from_user)
+    await message.answer("Привет! Какой кофе желаете?", reply_markup=coffee_menu)
+
+@dp.callback_query()
+async def process_callback(callback: types.CallbackQuery):
+    user_id = callback.from_user.id
+
+    if callback.data in coffee_images:
+        user_orders[user_id] = {"coffee": callback.data}
+        await bot.send_photo(chat_id=user_id, photo=coffee_images[callback.data],
+                             caption=f"Вы выбрали {callback.data}. Какой размер?", reply_markup=size_menu)
+
+    elif callback.data == "confirm":
+        order = user_orders.get(user_id, {})
+        coffee = order.get("coffee", "?")
+        size = order.get("size", "?")
+        comment = order.get("comment", "Без комментария")
+        await save_order(user_id, coffee, size, comment)
+        await callback.message.answer(
+            f"☕ Ваш заказ: {coffee}, {size}.\n"
+            f"Комментарий: {comment}\n"
+            "✅ Заказ принят! Будет готов в течение 5 минут."
+        )
+        user_orders.pop(user_id, None)
+
+    elif callback.data == "cancel":
+        await callback.message.answer("❌ Заказ отменен.")
+        user_orders.pop(user_id, None)
+
+@dp.message()
+async def process_message(message: types.Message):
+    user_id = message.from_user.id
+
+    if user_id in user_orders and "coffee" in user_orders[user_id]:
+        if message.text in ["Маленький", "Средний", "Большой"]:
+            user_orders[user_id]["size"] = message.text
+            await message.answer("Добавьте комментарий к заказу (или напишите 'Без комментария').")
+
+        elif "size" in user_orders[user_id]:
+            user_orders[user_id]["comment"] = message.text
+            await message.answer("Подтвердите заказ.", reply_markup=confirm_menu)
+        else:
+            await message.answer("Пожалуйста, выберите размер кофе.", reply_markup=size_menu)
+
+async def create_db_pool():
+    global db_pool
+    db_pool = await asyncpg.create_pool(
+        user=DB_USER,
+        password=DB_PASSWORD,
+        database=DB_NAME,
+        host=DB_HOST,
+        port=DB_PORT
+    )
+
+async def main():
+    await create_db_pool()
+    print("Bot started...")
+    try:
+        await dp.start_polling(bot)
+    except Exception as e:
+        print(e)
+    finally:
+        await db_pool.close()
+
+if __name__ == '__main__':
+    asyncio.run(main())
